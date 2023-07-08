@@ -6,7 +6,7 @@ fetch("./data.json").then(r => r.json()).then(data => {
   const store = f3.createStore({
       data,
       cont: document.querySelector("#chart"),
-      card_display: [d => d.data.label || '', d => d.data.desc || ''],
+      card_display: [d => d.data.name || '', d => d.data.testing || ''],
       mini_tree: true,
       hide_rels: true,
       node_separation: 250,
