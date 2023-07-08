@@ -1,8 +1,8 @@
 import {getFamilyDataForItem} from './wiki-data.handleWikiData.js';
 import {props} from './wiki-data.dict.js';
 
-export async function getFamilyTreeFromWikidata(wiki_stash, wiki_id) {
-  const data_wd = await getFamilyDataForItem(wiki_stash, wiki_id, 2)
+export async function getFamilyTreeFromWikidata(wiki_stash, wiki_key) {
+  const data_wd = await getFamilyDataForItem(wiki_stash, wiki_key, 2)
   return {wiki_stash, data: childrenToParentsFix(parentsToSpousesFix(wdToFamilyTree(data_wd)))}
 }
 
