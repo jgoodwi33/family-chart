@@ -10,35 +10,33 @@ function wdToFamilyTree(data_wd) {
   return data_wd.map(wdItemToFtItem)
 
   function wdItemToFtItem(datum) {
-    const first_name = get(props.first_name, "labels"),
-      last_name = get(props.last_name, "labels"),
-      gender = get(props.gender, "id"),
-      father = get(props.father, "id"),
-      mother = get(props.mother, "id"),
-      spouses = get(props.spouse, "ids"),
-      children = get(props.child, "ids"),
+    const first_name = get(props.name, "name"),
+      gender = get(props.gender, "key"),
+      father = get(props.parent1RegistrationNum, "key"),
+      mother = get(props.parent2RegistrationNum, "key"),
+      children = get(props.child, "keys"),
       ft_datum = {
-        id: datum.wiki_id,
-        data: {fn: first_name, ln: last_name, desc: datum.desc, label: datum.label, avatar: datum.avatar},
-        rels: {}
+        key: datum.key,
+        attributes: {name: name, color: datum.color, gender: datum.gender, sire: datum.sire, dam: datum.dam, testing: datum.testing, avatar: datum.url, },
+        children: {}
       }
 
-    if (gender === props.male || gender === props.female) ft_datum.data.gender = gender === props.male ? "M" : "F"
-    if (father && data_wd.find(d => d.wiki_id === father)) ft_datum.rels.father = father
-    if (mother && data_wd.find(d => d.wiki_id === mother)) ft_datum.rels.mother = mother
-    ft_datum.rels.spouses = spouses.filter(d_id => data_wd.find(d => d.wiki_id === d_id))
-    ft_datum.rels.spouses = [...new Set(ft_datum.rels.spouses)]  // if its remarried there are 2 entries
-    ft_datum.rels.children = children.filter(d_id => data_wd.find(d => d.wiki_id === d_id))
+    if (gender === props.male || gender === props.female) ft_datum.data.gender = gender === props.male ? "Male" : "Female"
+    if (sire && data_wd.find(d => d.key === sire)) ft_datum.children = sire
+    if (dam && data_wd.find(d => d.key === mother)) ft_datum.children = dam
+   // ft_datum.rels.spouses = spouses.filter(d_id => data_wd.find(d => d.wiki_id === d_id))
+    //ft_datum.rels.spouses = [...new Set(ft_datum.rels.spouses)]  // if its remarried there are 2 entries
+    ft_datum.children = children.filter(d_key => data_wd.find(d => d.key === d_id))
 
     return ft_datum
 
     function get(prop, type) {
-      return type === "id"
-        ? (datum.claims.find(d => d.prop_id === prop) || {}).wiki_id
-        : type === "ids"
-          ? datum.claims.filter(d => d.prop_id === prop).map(d => d.wiki_id)
-          : type === "labels"
-            ? datum.claims.filter(d => d.prop_id === prop).map(d => d.label).join(" ")
+      return type === "key"
+        ? (datum.claims.find(d => d.prop_key === prop) || {}).keys
+        : type === "keys"
+          ? datum.claims.filter(d => d.prop_key === prop).map(d => d.key)
+          : type === "names"
+            ? datum.claims.filter(d => d.prop_key === prop).map(d => d.name).join(" ")
             : null
     }
   }
@@ -46,12 +44,12 @@ function wdToFamilyTree(data_wd) {
 
 function parentsToSpousesFix(data) {
   data.forEach(datum => {
-    const r = datum.rels;
-    if (!r.mother || !r.father) return
-    const p1 = data.find(d => d.id === r.mother),
-      p2 = data.find(d => d.id === r.father)
-    if (!p1.rels.spouses.includes(p2.id)) p1.rels.spouses.push(p2.id)
-    if (!p2.rels.spouses.includes(p1.id)) p2.rels.spouses.push(p1.id)
+    const r = datum.children;
+    if (!r.dam || !r.sire) return
+    const p1 = data.find(d => d.key === r.dam),
+      p2 = data.find(d => d.key === r.sire)
+    if (!p1.children.includes(p2.key)) p1.children.push(p2.key)
+    if (!p2.children.includes(p1.key)) p2.children.push(p1.key)
   })
 
   return data
@@ -59,18 +57,18 @@ function parentsToSpousesFix(data) {
 
 function childrenToParentsFix(data) {
   data.forEach(datum => {
-    const r = datum.rels;
+    const r = datum.children;
     if (!r.children) return
-    r.children.forEach(ch_id => {
-      const child = data.find(d => d.id === ch_id)
-      if (datum.data.gender === 'F' && !child.rels.mother) child.rels.mother = datum.id;
-      if (datum.data.gender === 'M' && !child.rels.father) child.rels.father = datum.id;
+    r.children.forEach(ch_key => {
+      const child = data.find(d => d.key === ch_key)
+      if (datum.data.gender === 'Female' && !child.parent2RegistrationNum) child.dam = datum.key;
+      if (datum.data.gender === 'Male' && !child.parent1RegistrationNum) child.sire = datum.key;
     })
 
-    r.children = r.children.filter(ch_id => {
-      const child = data.find(d => d.id === ch_id)
-      if (datum.data.gender === 'F' && child.rels.mother && child.rels.mother !== datum.id) return false
-      else if (datum.data.gender === 'M' && child.rels.father && child.rels.father !== datum.id) return false
+    r.children = r.children.filter(ch_key => {
+      const child = data.find(d => d.key === ch_key)
+      if (datum.data.gender === 'Female' && child.children.parent2RegistrationNum && child.children.parent2RegistrationNum !== datum.key) return false
+      else if (datum.data.gender === 'Male' && child.children.parent1RegistrationNum && child.children.parent1RegistrationNum !== datum.key) return false
       else return true
     })
   })
