@@ -31,7 +31,7 @@ import {Form} from "../../src/view/elements/Form.js"
       mini_tree: true,
       link_break: false,
       cardEditForm,
-      addRelative: f3.handlers.AddRelative({store, cont, card_dim, cardEditForm, labels: {mother: 'Add mother'}}),
+      addRelative: f3.handlers.AddRelative({store, cont, card_dim, cardEditForm, labels: {dam: 'Add dam'}}),
     }),
     edit = Edit('#edit_cont', card_edit),
     display = Display('#display_cont', store, card_display),
@@ -63,24 +63,29 @@ import {Form} from "../../src/view/elements/Form.js"
 })();
 
 function firstNode() {
-  return [{id: '0', rels: {}, data: {'first name': 'Name', 'last name': "Surname", 'birthday': 1970,
+  return [{id: '1', children: {}, data: {'name': 'Name', 'key': "key", 'parents': 'color',
       avatar: 'https://static8.depositphotos.com/1009634/988/v/950/depositphotos_9883921-stock-illustration-no-user-profile-picture.jpg', gender: "M"}}]
 }
 
 function cardEditParams() {
   return [
-    {type: 'text', placeholder: 'first name', key: 'first name'},
-    {type: 'text', placeholder: 'last name', key: 'last name'},
-    {type: 'text', placeholder: 'birthday', key: 'birthday'},
-    {type: 'text', placeholder: 'avatar', key: 'avatar'}
+    {type: 'text', placeholder: 'name', key: 'name'},
+    {type: 'text', placeholder: 'key', key: 'key'},
+    {type: 'text', placeholder: 'gender', key: 'gender'},
+    {type: 'text', placeholder: 'color', key: 'color'},
+    {type: 'text', placeholder: 'parents', key: 'parents'},
+    {type: 'text', placeholder: 'avatar', key: 'url'}
+
   ]
 }
 
 function cardDisplay() {
-  const d1 = d => `${d.data['first name'] || ''} ${d.data['last name'] || ''}`,
-    d2 = d => `${d.data['birthday'] || ''}`
-  d1.create_form = "{first name} {last name}"
-  d2.create_form = "{birthday}"
+  const d1 = d => `${d.data['name'] || ''}`,
+    d2 = d => `${d.data['color'] || ''}`,
+        d3 = d => `${d.data['testing'] || ''}`
+  d1.create_form = "{name}"
+  d2.create_form = "{color}"
+  d3.create_form = "{testing}"
 
-  return [d1, d2]
+  return [d1, d2, d3]
 }
